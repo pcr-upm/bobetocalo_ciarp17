@@ -17,10 +17,6 @@ set(face_headpose_cnn_include
   ${faces_framework_include}
   ${Caffe_INCLUDE_DIRS}
   ${CMAKE_CURRENT_LIST_DIR}/include
-  )
-
-include_directories(
-  ${face_headpose_cnn_include}
 )
 
 set(face_headpose_cnn_src
@@ -28,12 +24,19 @@ set(face_headpose_cnn_src
   ${CMAKE_CURRENT_LIST_DIR}/src/FaceHeadPoseCnn.cpp
 )
 
+set(face_headpose_cnn_test
+  ${CMAKE_CURRENT_LIST_DIR}/test/face_headpose_cnn_test.cpp
+)
+
+set(face_headpose_cnn_libs
+  ${faces_framework_libs}
+  ${Caffe_LIBRARIES}
+)
+
 #-- Setup CMake to run tests
 enable_testing()
 
-set(face_headpose_cnn_test
-  ${CMAKE_CURRENT_LIST_DIR}/test/face_headpose_cnn_test.cpp
-  )
+include_directories(${face_headpose_cnn_include})
 
 foreach(test ${face_headpose_cnn_test})
   get_filename_component(test_name ${test} NAME_WE)
@@ -41,12 +44,6 @@ foreach(test ${face_headpose_cnn_test})
     ${face_headpose_cnn_src}
     ${test}
   )
-  target_link_libraries(${test_name}
-    ${OpenCV_LIBS}
-    ${Boost_LIBRARIES}
-    ${Caffe_LIBRARIES}
-    jpeg
-    png
-  )
+  target_link_libraries(${test_name} ${face_headpose_cnn_libs})
   add_test(NAME ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND ${test_name})
 endforeach()
