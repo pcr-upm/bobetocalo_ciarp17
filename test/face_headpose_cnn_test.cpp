@@ -35,7 +35,7 @@ main
 {
   // Read sample annotations
   upm::FaceAnnotation ann;
-  ann.filename = "../test/image68232.jpg";
+  ann.filename = "test/image68232.jpg";
   ann.bbox.pos = cv::Rect2f(103, 78, 114, 114);
   ann.headpose = cv::Point3f(-18.5096430850602, -3.10501745129284, -17.5719175410085);
   cv::Mat frame = cv::imread(ann.filename, cv::IMREAD_COLOR);
@@ -48,7 +48,7 @@ main
 
   /// Load face components
   boost::shared_ptr<upm::FaceComposite> composite(new upm::FaceComposite());
-  boost::shared_ptr<upm::FaceHeadPose> fh(new upm::FaceHeadPoseCnn("../data/"));
+  boost::shared_ptr<upm::FaceHeadPose> fh(new upm::FaceHeadPoseCnn("data/"));
   composite->addComponent(fh);
 
   /// Parse face component options
@@ -62,7 +62,7 @@ main
   // Draw results
   boost::shared_ptr<upm::Viewer> viewer(new upm::Viewer);
   viewer->init(0, 0, "face_headpose_cnn_test");
-  showResults(viewer, ticks, 0, frame, composite, faces, ann);
+  showResults(viewer, ticks, 1000, frame, composite, faces, ann);
 
   UPM_PRINT("End of face_headpose_cnn_test");
   return EXIT_SUCCESS;
