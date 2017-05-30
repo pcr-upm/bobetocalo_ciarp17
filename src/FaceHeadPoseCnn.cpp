@@ -96,7 +96,7 @@ FaceHeadPoseCnn::load()
   UPM_PRINT("Loading head-pose");
   std::string deploy_file   = _data_path + "GoogLeNet_test.prototxt";
   std::string trained_model = _data_path + "GoogLeNet.caffemodel";
-  caffe::Caffe::set_mode(caffe::Caffe::GPU);
+  caffe::Caffe::set_mode(caffe::Caffe::CPU);
   _net.reset(new caffe::Net<float>(deploy_file, caffe::TEST));
   _net->CopyTrainedLayersFrom(trained_model);
   caffe::Blob<float> *input_layer = _net->input_blobs()[0];
