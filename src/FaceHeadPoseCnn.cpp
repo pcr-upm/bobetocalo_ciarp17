@@ -125,15 +125,17 @@ FaceHeadPoseCnn::process
   for (FaceAnnotation &face : faces)
   {
     // Scale image
-    cv::Mat face_scaled;
-    cv::Rect bbox = intersection(face.bbox.pos, cv::Rect(0,0,frame.cols,frame.rows));
-    cv::resize(frame(bbox), face_scaled, _face_size, 0, 0, cv::INTER_AREA);
+    //cv::Mat face_scaled;
+    //cv::Rect bbox = intersection(face.bbox.pos, cv::Rect(0,0,frame.cols,frame.rows));
+    //cv::resize(frame(bbox), face_scaled, _face_size, 0, 0, cv::INTER_AREA);
+    cv::Mat img_T, T = (cv::Mat_<float>(2,3) << 1, 0, -face.bbox.pos.x, 0, 1, -face.bbox.pos.y);
+    cv::warpAffine(frame, img_T, T, frame.size());
+    cv::Mat face_scaled, S = (cv::Mat_<float>(2,3) << _face_size.width/face.bbox.pos.width, 0, 0, 0, _face_size.height/face.bbox.pos.height, 0);
+    cv::warpAffine(img_T, face_scaled, S, _face_size);
 
     // Estimate head-pose using a CNN
-    cv::Mat face_aux, face_normalized;
-    face_scaled.convertTo(face_aux, CV_32FC3);
-    cv::Scalar mean_pixel = cv::Scalar(133.23217514, 108.31150523, 95.0426278);
-    cv::subtract(face_aux, mean_pixel, face_normalized);
+    cv::Mat face_normalized;
+    face_scaled.convertTo(face_normalized, CV_32FC3);
 
     caffe::Blob<float> *input_layer = _net->input_blobs()[0];
     float *input_data = input_layer->mutable_cpu_data();
