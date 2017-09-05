@@ -28,7 +28,6 @@ namespace upm {
 // -----------------------------------------------------------------------------
 FaceHeadPoseCnn::FaceHeadPoseCnn(std::string path)
 {
-  _face_size = cv::Size(224,224);
   _data_path = path;
 };
 
@@ -121,30 +120,28 @@ FaceHeadPoseCnn::process
   const upm::FaceAnnotation &ann
   )
 {
+  caffe::Blob<float> *input_layer = _net->input_blobs()[0];
+  float *input_data = input_layer->mutable_cpu_data();
+  std::vector<cv::Mat> input_channels(input_layer->channels()); // B, G, R
+  for (cv::Mat &input_channel : input_channels)
+  {
+    input_channel = cv::Mat(input_layer->height(), input_layer->width(), CV_32FC1, input_data);
+    input_data += input_layer->height() * input_layer->width();
+  }
+  cv::Size face_size = cv::Size(_net->input_blobs()[0]->shape()[2],_net->input_blobs()[0]->shape()[3]);
+
   // Analyze each detected face
   for (FaceAnnotation &face : faces)
   {
     // Scale image
-    //cv::Mat face_scaled;
-    //cv::Rect bbox = intersection(face.bbox.pos, cv::Rect(0,0,frame.cols,frame.rows));
-    //cv::resize(frame(bbox), face_scaled, _face_size, 0, 0, cv::INTER_AREA);
-    cv::Mat img_T, T = (cv::Mat_<float>(2,3) << 1, 0, -face.bbox.pos.x, 0, 1, -face.bbox.pos.y);
-    cv::warpAffine(frame, img_T, T, frame.size());
-    cv::Mat face_scaled, S = (cv::Mat_<float>(2,3) << _face_size.width/face.bbox.pos.width, 0, 0, 0, _face_size.height/face.bbox.pos.height, 0);
-    cv::warpAffine(img_T, face_scaled, S, _face_size);
+    cv::Mat face_translated, T = (cv::Mat_<float>(2,3) << 1, 0, -face.bbox.pos.x, 0, 1, -face.bbox.pos.y);
+    cv::warpAffine(frame, face_translated, T, frame.size());
+    cv::Mat face_scaled, S = (cv::Mat_<float>(2,3) << face_size.width/face.bbox.pos.width, 0, 0, 0, face_size.height/face.bbox.pos.height, 0);
+    cv::warpAffine(face_translated, face_scaled, S, face_size);
 
     // Estimate head-pose using a CNN
     cv::Mat face_normalized;
     face_scaled.convertTo(face_normalized, CV_32FC3);
-
-    caffe::Blob<float> *input_layer = _net->input_blobs()[0];
-    float *input_data = input_layer->mutable_cpu_data();
-    std::vector<cv::Mat> input_channels(input_layer->channels()); // B, G, R
-    for (cv::Mat &input_channel : input_channels)
-    {
-      input_channel = cv::Mat(input_layer->height(), input_layer->width(), CV_32FC1, input_data);
-      input_data += input_layer->height() * input_layer->width();
-    }
     cv::split(face_normalized, input_channels);
     _net->Forward();
 

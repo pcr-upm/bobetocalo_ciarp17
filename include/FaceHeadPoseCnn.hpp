@@ -54,7 +54,6 @@ public:
     const upm::FaceAnnotation &ann
     );
 
-  cv::Size _face_size;
   std::string _data_path;
   boost::shared_ptr< caffe::Net<float> > _net;
 };
