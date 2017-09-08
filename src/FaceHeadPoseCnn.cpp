@@ -211,8 +211,8 @@ FaceHeadPoseCnn::create_HDF5_database
 {
   cv::Size face_size = cv::Size(224,224);
   unsigned int num_indices = static_cast<unsigned int>(anns_idx.size());
-  num_indices = 10;
-  float label[num_indices][3], image[num_indices][3][face_size.height][face_size.width];
+  float label[num_indices][3];
+  float *image[num_indices];
   boost::progress_display show_progress(num_indices);
   for (int i=0; i < num_indices; i++, ++show_progress)
   {
@@ -227,24 +227,28 @@ FaceHeadPoseCnn::create_HDF5_database
 
     std::vector<cv::Mat> input_channels(static_cast<unsigned int>(face_normalized.channels())); // [B, G, R]
     cv::split(face_normalized, input_channels);
-    for (unsigned int channel=0; channel < 3; channel++)
-      for (unsigned int row=0; row < face_size.height; row++)
-        for (unsigned int col=0; col < face_size.width; col++)
-          image[i][channel][row][col] = input_channels[channel].ptr<float>(row)[col];
-    label[i][0] = anns[i].headpose.x;
-    label[i][1] = anns[i].headpose.y;
-    label[i][2] = anns[i].headpose.z;
+    /*for (cv::Mat &input_channel : input_channels)
+      image[i] = input_channel.ptr<float>();*/
+    label[i][0] = ann.headpose.x;
+    label[i][1] = ann.headpose.y;
+    label[i][2] = ann.headpose.z;
   }
-  H5::H5File h5_ofs(filename, H5F_ACC_TRUNC);
-  hsize_t imagedim[4] = {num_indices, 3, static_cast<hsize_t>(face_size.height), static_cast<hsize_t>(face_size.width)};
-  H5::DataSpace image_space = H5::DataSpace(4, imagedim);
-  H5::DataSet imageset = H5::DataSet(h5_ofs.createDataSet("data", H5::PredType::NATIVE_FLOAT, image_space));
-  imageset.write(image, H5::PredType::NATIVE_FLOAT);
-  hsize_t labeldim[2] = {num_indices, 3};
-  H5::DataSpace label_space = H5::DataSpace(2, labeldim);
-  H5::DataSet labelset = H5::DataSet(h5_ofs.createDataSet("label", H5::PredType::NATIVE_FLOAT, label_space));
-  labelset.write(label, H5::PredType::NATIVE_FLOAT);
-  h5_ofs.close();
+  boost::shared_ptr<H5::H5File> h5_ofs(new H5::H5File(filename, H5F_ACC_TRUNC));
+  //hsize_t type_dim[3] = {3, static_cast<hsize_t>(face_size.height), static_cast<hsize_t>(face_size.width)};
+  hsize_t type_dim[3] = {1, 1, 1};
+  H5::ArrayType image_type(H5::PredType::NATIVE_FLOAT, 3, type_dim);
+  hsize_t image_dim[1] = {num_indices};
+  H5::DataSpace image_space(1, image_dim);
+  H5::DataSet image_set = H5::DataSet(h5_ofs->createDataSet("data", image_type, image_space));
+  image_set.write(image, image_type);
+
+  H5::FloatType label_type(H5::PredType::NATIVE_FLOAT);
+  hsize_t label_dim[2] = {num_indices, 3};
+  H5::DataSpace label_space(2, label_dim);
+  H5::DataSet label_set = H5::DataSet(h5_ofs->createDataSet("label", label_type, label_space));
+  label_set.write(label, label_type);
+  h5_ofs->close();
+  std::cout << "Saved model: " + filename << std::endl;
 };
 
 } // namespace upm
