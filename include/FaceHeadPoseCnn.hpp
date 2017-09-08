@@ -54,6 +54,14 @@ public:
     const upm::FaceAnnotation &ann
     );
 
+  void
+  create_HDF5_database
+    (
+    const std::vector<upm::FaceAnnotation> &anns,
+    const std::vector<int> &anns_idx,
+    std::string filename
+    );
+
   std::string _data_path;
   boost::shared_ptr< caffe::Net<float> > _net;
 };
