@@ -15,7 +15,6 @@
 #include <boost/program_options.hpp>
 #include <caffe/sgd_solvers.hpp>
 #include <H5Cpp.h>
-#include <H5Tpublic.h>
 
 namespace upm {
 
