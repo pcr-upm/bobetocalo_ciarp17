@@ -15,6 +15,7 @@
 #include <boost/program_options.hpp>
 #include <caffe/sgd_solvers.hpp>
 #include <H5Cpp.h>
+#include <H5Tpublic.h>
 
 namespace upm {
 
@@ -76,7 +77,7 @@ FaceHeadPoseCnn::train
   const unsigned int num_data = static_cast<unsigned int>(anns.size());
   int num_train_data = static_cast<int>(num_data * TRAIN_IMAGES_PERCENTAGE);
   int num_valid_data = num_data - num_train_data;
-  const float MAX_IMAGES_PER_H5_FILE = 2000;
+  const float MAX_IMAGES_PER_H5_FILE = 12;
   unsigned int num_train_sets = static_cast<unsigned int>(std::ceil(num_train_data/MAX_IMAGES_PER_H5_FILE));
   unsigned int num_valid_sets = static_cast<unsigned int>(std::ceil(num_valid_data/MAX_IMAGES_PER_H5_FILE));
   std::vector< std::vector<int> > train_sets(num_train_sets), valid_sets(num_valid_sets);
@@ -89,14 +90,14 @@ FaceHeadPoseCnn::train
   for (unsigned int i=0; i < num_train_sets; i++)
   {
     char h5_path[200];
-    sprintf(h5_path, "%strain_%02d.h5", _data_path.c_str(), i);
+    sprintf(h5_path, "%strain_%05d.h5", _data_path.c_str(), i);
     create_HDF5_database(anns, train_sets[i], h5_path);
     ofs_train << h5_path << std::endl;
   }
   for (unsigned int i=0; i < num_valid_sets; i++)
   {
     char h5_path[200];
-    sprintf(h5_path, "%svalid_%02d.h5", _data_path.c_str(), i);
+    sprintf(h5_path, "%svalid_%05d.h5", _data_path.c_str(), i);
     create_HDF5_database(anns, valid_sets[i], h5_path);
     ofs_valid << h5_path << std::endl;
   }
@@ -212,7 +213,7 @@ FaceHeadPoseCnn::create_HDF5_database
   cv::Size face_size = cv::Size(224,224);
   unsigned int num_indices = static_cast<unsigned int>(anns_idx.size());
   float label[num_indices][3];
-  float *image[num_indices];
+  float image[num_indices][3][face_size.height][face_size.width];
   boost::progress_display show_progress(num_indices);
   for (int i=0; i < num_indices; i++, ++show_progress)
   {
@@ -227,18 +228,18 @@ FaceHeadPoseCnn::create_HDF5_database
 
     std::vector<cv::Mat> input_channels(static_cast<unsigned int>(face_normalized.channels())); // [B, G, R]
     cv::split(face_normalized, input_channels);
-    /*for (cv::Mat &input_channel : input_channels)
-      image[i] = input_channel.ptr<float>();*/
+    for (int channel=0; channel < input_channels.size(); channel++)
+      for (int row=0; row < input_channels[channel].rows; row++)
+        for (int col=0; col < input_channels[channel].cols; col++)
+          image[i][channel][row][col] = input_channels[channel].ptr<float>(row)[col];
     label[i][0] = ann.headpose.x;
     label[i][1] = ann.headpose.y;
     label[i][2] = ann.headpose.z;
   }
   boost::shared_ptr<H5::H5File> h5_ofs(new H5::H5File(filename, H5F_ACC_TRUNC));
-  //hsize_t type_dim[3] = {3, static_cast<hsize_t>(face_size.height), static_cast<hsize_t>(face_size.width)};
-  hsize_t type_dim[3] = {1, 1, 1};
-  H5::ArrayType image_type(H5::PredType::NATIVE_FLOAT, 3, type_dim);
-  hsize_t image_dim[1] = {num_indices};
-  H5::DataSpace image_space(1, image_dim);
+  H5::FloatType image_type(H5::PredType::NATIVE_FLOAT);
+  hsize_t image_dim[4] = {num_indices, 3, (hsize_t)face_size.height, (hsize_t)face_size.width};
+  H5::DataSpace image_space(4, image_dim);
   H5::DataSet image_set = H5::DataSet(h5_ofs->createDataSet("data", image_type, image_space));
   image_set.write(image, image_type);
 
