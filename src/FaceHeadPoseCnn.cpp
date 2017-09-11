@@ -14,7 +14,7 @@
 #include <boost/progress.hpp>
 #include <boost/program_options.hpp>
 #include <caffe/sgd_solvers.hpp>
-#include <H5Cpp.h>
+//#include <H5Cpp.h>
 
 namespace upm {
 
@@ -235,19 +235,19 @@ FaceHeadPoseCnn::create_HDF5_database
     label[i][1] = ann.headpose.y;
     label[i][2] = ann.headpose.z;
   }
-  boost::shared_ptr<H5::H5File> h5_ofs(new H5::H5File(filename, H5F_ACC_TRUNC));
-  H5::FloatType image_type(H5::PredType::NATIVE_FLOAT);
-  hsize_t image_dim[4] = {num_indices, 3, (hsize_t)face_size.height, (hsize_t)face_size.width};
-  H5::DataSpace image_space(4, image_dim);
-  H5::DataSet image_set = H5::DataSet(h5_ofs->createDataSet("data", image_type, image_space));
-  image_set.write(image, image_type);
-
-  H5::FloatType label_type(H5::PredType::NATIVE_FLOAT);
-  hsize_t label_dim[2] = {num_indices, 3};
-  H5::DataSpace label_space(2, label_dim);
-  H5::DataSet label_set = H5::DataSet(h5_ofs->createDataSet("label", label_type, label_space));
-  label_set.write(label, label_type);
-  h5_ofs->close();
+//  boost::shared_ptr<H5::H5File> h5_ofs(new H5::H5File(filename, H5F_ACC_TRUNC));
+//  H5::FloatType image_type(H5::PredType::NATIVE_FLOAT);
+//  hsize_t image_dim[4] = {num_indices, 3, (hsize_t)face_size.height, (hsize_t)face_size.width};
+//  H5::DataSpace image_space(4, image_dim);
+//  H5::DataSet image_set = H5::DataSet(h5_ofs->createDataSet("data", image_type, image_space));
+//  image_set.write(image, image_type);
+//
+//  H5::FloatType label_type(H5::PredType::NATIVE_FLOAT);
+//  hsize_t label_dim[2] = {num_indices, 3};
+//  H5::DataSpace label_space(2, label_dim);
+//  H5::DataSet label_set = H5::DataSet(h5_ofs->createDataSet("label", label_type, label_space));
+//  label_set.write(label, label_type);
+//  h5_ofs->close();
   std::cout << "Saved model: " + filename << std::endl;
 };
 
