@@ -14,8 +14,7 @@
 // ----------------------- INCLUDES --------------------------------------------
 #include <FaceHeadPose.hpp>
 #include <opencv2/opencv.hpp>
-#include <boost/shared_ptr.hpp>
-#include <caffe/caffe.hpp>
+#include <opencv2/dnn.hpp>
 
 namespace upm {
 
@@ -63,7 +62,7 @@ public:
     );
 
   std::string _data_path;
-  boost::shared_ptr< caffe::Net<float> > _net;
+  cv::dnn::Net _net;
 };
 
 } // namespace upm

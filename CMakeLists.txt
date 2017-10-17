@@ -7,10 +7,10 @@ cmake_minimum_required(VERSION 3.2)
 include(${CMAKE_CURRENT_LIST_DIR}/../../CMakeLists.txt)
 
 #-- Setup required libraries
-find_package(Caffe REQUIRED)
-message(STATUS Caffe_LIBRARIES=${Caffe_LIBRARIES})
-message(STATUS Caffe_INCLUDE_DIRS=${Caffe_INCLUDE_DIRS})
-message(STATUS Caffe_DEFINITIONS=${Caffe_DEFINITIONS})
+#find_package(Caffe REQUIRED)
+#message(STATUS Caffe_LIBRARIES=${Caffe_LIBRARIES})
+#message(STATUS Caffe_INCLUDE_DIRS=${Caffe_INCLUDE_DIRS})
+#message(STATUS Caffe_DEFINITIONS=${Caffe_DEFINITIONS})
 
 #find_package(HDF5 REQUIRED)
 #message(STATUS HDF5_LIBRARIES=${HDF5_LIBRARIES})
@@ -20,7 +20,7 @@ message(STATUS Caffe_DEFINITIONS=${Caffe_DEFINITIONS})
 #-- Find include files
 set(face_headpose_cnn_include
   ${faces_framework_include}
-  ${Caffe_INCLUDE_DIRS}
+#  ${Caffe_INCLUDE_DIRS}
 #  ${HDF5_INCLUDE_DIRS}
   ${CMAKE_CURRENT_LIST_DIR}/include
 )
@@ -36,7 +36,7 @@ set(face_headpose_cnn_test
 
 set(face_headpose_cnn_libs
   ${faces_framework_libs}
-  ${Caffe_LIBRARIES}
+#  ${Caffe_LIBRARIES}
 #  ${HDF5_LIBRARIES}
 )
 

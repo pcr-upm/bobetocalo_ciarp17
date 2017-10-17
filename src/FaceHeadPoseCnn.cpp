@@ -13,8 +13,6 @@
 #include <FaceHeadPoseCnn.hpp>
 #include <boost/progress.hpp>
 #include <boost/program_options.hpp>
-#include <caffe/sgd_solvers.hpp>
-//#include <H5Cpp.h>
 
 namespace upm {
 
@@ -107,13 +105,13 @@ FaceHeadPoseCnn::train
   UPM_PRINT("Training head-pose model");
   std::string solver_file   = _data_path + "solver.prototxt";
   std::string trained_model = _data_path + "bvlc_googlenet.caffemodel";
-  caffe::Caffe::set_mode(caffe::Caffe::CPU);
-  caffe::SolverParameter solver_params;
-  caffe::ReadProtoFromTextFileOrDie(solver_file, &solver_params);
-  boost::shared_ptr< caffe::Solver<float> > solver;
-  solver.reset(new caffe::NesterovSolver<float>(solver_params));
-  solver->net()->CopyTrainedLayersFrom(trained_model);
-  solver->Solve();
+//  caffe::Caffe::set_mode(caffe::Caffe::CPU);
+//  caffe::SolverParameter solver_params;
+//  caffe::ReadProtoFromTextFileOrDie(solver_file, &solver_params);
+//  boost::shared_ptr< caffe::Solver<float> > solver;
+//  solver.reset(new caffe::NesterovSolver<float>(solver_params));
+//  solver->net()->CopyTrainedLayersFrom(trained_model);
+//  solver->Solve();
 };
 
 // -----------------------------------------------------------------------------
@@ -132,12 +130,14 @@ FaceHeadPoseCnn::load()
   UPM_PRINT("Loading head-pose");
   std::string deploy_file   = _data_path + "GoogLeNet_test.prototxt";
   std::string trained_model = _data_path + "GoogLeNet.caffemodel";
-  caffe::Caffe::set_mode(caffe::Caffe::CPU);
-  _net.reset(new caffe::Net<float>(deploy_file, caffe::TEST));
-  _net->CopyTrainedLayersFrom(trained_model);
-  caffe::Blob<float> *input_layer = _net->input_blobs()[0];
-  input_layer->Reshape(1, input_layer->channels(), input_layer->height(), input_layer->width());
-  _net->Reshape();
+  try
+  {
+    _net = cv::dnn::readNetFromCaffe(deploy_file, trained_model);
+  }
+  catch (cv::Exception &ex)
+  {
+    UPM_ERROR("Exception: " << ex.what());
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -157,15 +157,7 @@ FaceHeadPoseCnn::process
   const upm::FaceAnnotation &ann
   )
 {
-  caffe::Blob<float> *input_layer = _net->input_blobs()[0];
-  float *input_data = input_layer->mutable_cpu_data();
-  std::vector<cv::Mat> input_channels(static_cast<unsigned int>(input_layer->channels())); // [B, G, R]
-  for (cv::Mat &input_channel : input_channels)
-  {
-    input_channel = cv::Mat(input_layer->height(), input_layer->width(), CV_32FC1, input_data);
-    input_data += input_layer->height() * input_layer->width();
-  }
-  cv::Size face_size = cv::Size(_net->input_blobs()[0]->shape()[2],_net->input_blobs()[0]->shape()[3]);
+  cv::Size face_size = cv::Size(224,224);
 
   // Analyze each detected face
   for (FaceAnnotation &face : faces)
@@ -177,15 +169,13 @@ FaceHeadPoseCnn::process
     cv::warpAffine(face_translated, face_scaled, S, face_size);
 
     // Estimate head-pose using a CNN
-    cv::Mat face_normalized;
-    face_scaled.convertTo(face_normalized, CV_32FC3);
-    cv::split(face_normalized, input_channels);
-    _net->Forward();
-
-    caffe::Blob<float> *output_layer = _net->output_blobs()[0];
-    const float *begin = output_layer->cpu_data();
-    const float *end = begin + output_layer->channels();
-    std::vector<float> output = std::vector<float>(begin, end);
+    double scale_factor = 1.0;
+    cv::Scalar mean = cv::Scalar(0,0,0);
+    bool swapRB = false;
+    cv::Mat input_blob = cv::dnn::blobFromImage(face_scaled, scale_factor, face_size, mean, swapRB);
+    _net.setInput(input_blob, "data");
+    cv::Mat prob = _net.forward();
+    const float *output = prob.ptr<float>();
 
     // Store continuous head-pose
     face.headpose = cv::Point3f(-output[0], output[1], -output[2]);
