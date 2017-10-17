@@ -16,6 +16,8 @@
 
 namespace upm {
 
+const float TRAIN_IMAGES_PERCENTAGE = 0.9f;
+
 // -----------------------------------------------------------------------------
 //
 // Purpose and Method:
@@ -68,50 +70,20 @@ FaceHeadPoseCnn::train
   )
 {
   // Select random annotations for training and validation
-  std::ofstream ofs_train(_data_path + "train_data.txt");
-  std::ofstream ofs_valid(_data_path + "valid_data.txt");
-  const float TRAIN_IMAGES_PERCENTAGE = 0.9f;
+  std::ofstream ofs_train(_data_path + "train.txt");
+  std::ofstream ofs_valid(_data_path + "valid.txt");
   const unsigned int num_data = static_cast<unsigned int>(anns.size());
   int num_train_data = static_cast<int>(num_data * TRAIN_IMAGES_PERCENTAGE);
   int num_valid_data = num_data - num_train_data;
-  const float MAX_IMAGES_PER_H5_FILE = 12;
-  unsigned int num_train_sets = static_cast<unsigned int>(std::ceil(num_train_data/MAX_IMAGES_PER_H5_FILE));
-  unsigned int num_valid_sets = static_cast<unsigned int>(std::ceil(num_valid_data/MAX_IMAGES_PER_H5_FILE));
-  std::vector< std::vector<int> > train_sets(num_train_sets), valid_sets(num_valid_sets);
   for (int i=0; i < num_train_data; i++)
-    train_sets[static_cast<unsigned int>(std::floor(i/MAX_IMAGES_PER_H5_FILE))].push_back(i);
+    ofs_train << anns[i].filename << "," << anns[i].bbox.pos.x << "," << anns[i].bbox.pos.y << "," << anns[i].bbox.pos.width << "," << anns[i].bbox.pos.height << "," << anns[i].headpose.x << "," << anns[i].headpose.y << "," << anns[i].headpose.z << std::endl;
   for (int i=0; i < num_valid_data; i++)
-    valid_sets[static_cast<unsigned int>(std::floor(i/MAX_IMAGES_PER_H5_FILE))].push_back(num_train_data+i);
-
-  // Create HDF5 databases
-  for (unsigned int i=0; i < num_train_sets; i++)
-  {
-    char h5_path[200];
-    sprintf(h5_path, "%strain_%05d.h5", _data_path.c_str(), i);
-    create_HDF5_database(anns, train_sets[i], h5_path);
-    ofs_train << h5_path << std::endl;
-  }
-  for (unsigned int i=0; i < num_valid_sets; i++)
-  {
-    char h5_path[200];
-    sprintf(h5_path, "%svalid_%05d.h5", _data_path.c_str(), i);
-    create_HDF5_database(anns, valid_sets[i], h5_path);
-    ofs_valid << h5_path << std::endl;
-  }
+    ofs_valid << anns[i].filename << "," << anns[i].bbox.pos.x << "," << anns[i].bbox.pos.y << "," << anns[i].bbox.pos.width << "," << anns[i].bbox.pos.height << "," << anns[i].headpose.x << "," << anns[i].headpose.y << "," << anns[i].headpose.z << std::endl;
   ofs_train.close();
   ofs_valid.close();
 
   // Training CNN model
   UPM_PRINT("Training head-pose model");
-  std::string solver_file   = _data_path + "solver.prototxt";
-  std::string trained_model = _data_path + "bvlc_googlenet.caffemodel";
-//  caffe::Caffe::set_mode(caffe::Caffe::CPU);
-//  caffe::SolverParameter solver_params;
-//  caffe::ReadProtoFromTextFileOrDie(solver_file, &solver_params);
-//  boost::shared_ptr< caffe::Solver<float> > solver;
-//  solver.reset(new caffe::NesterovSolver<float>(solver_params));
-//  solver->net()->CopyTrainedLayersFrom(trained_model);
-//  solver->Solve();
 };
 
 // -----------------------------------------------------------------------------
@@ -178,67 +150,8 @@ FaceHeadPoseCnn::process
     const float *output = prob.ptr<float>();
 
     // Store continuous head-pose
-    face.headpose = cv::Point3f(-output[0], output[1], -output[2]);
+    face.headpose = cv::Point3f(output[0], output[1], output[2]);
   }
-};
-
-// -----------------------------------------------------------------------------
-//
-// Purpose and Method:
-// Inputs:
-// Outputs:
-// Dependencies:
-// Restrictions and Caveats:
-//
-// -----------------------------------------------------------------------------
-void
-FaceHeadPoseCnn::create_HDF5_database
-  (
-  const std::vector<upm::FaceAnnotation> &anns,
-  const std::vector<int> &anns_idx,
-  std::string filename
-  )
-{
-  cv::Size face_size = cv::Size(224,224);
-  unsigned int num_indices = static_cast<unsigned int>(anns_idx.size());
-  float label[num_indices][3];
-  float image[num_indices][3][face_size.height][face_size.width];
-  boost::progress_display show_progress(num_indices);
-  for (int i=0; i < num_indices; i++, ++show_progress)
-  {
-    upm::FaceAnnotation ann = anns[anns_idx[i]];
-    cv::Mat frame = cv::imread(ann.filename, cv::IMREAD_COLOR);
-    cv::Mat face_translated, T = (cv::Mat_<float>(2,3) << 1, 0, -ann.bbox.pos.x, 0, 1, -ann.bbox.pos.y);
-    cv::warpAffine(frame, face_translated, T, frame.size());
-    cv::Mat face_scaled, S = (cv::Mat_<float>(2,3) << face_size.width/ann.bbox.pos.width, 0, 0, 0, face_size.height/ann.bbox.pos.height, 0);
-    cv::warpAffine(face_translated, face_scaled, S, face_size);
-    cv::Mat face_normalized;
-    face_scaled.convertTo(face_normalized, CV_32FC3);
-
-    std::vector<cv::Mat> input_channels(static_cast<unsigned int>(face_normalized.channels())); // [B, G, R]
-    cv::split(face_normalized, input_channels);
-    for (int channel=0; channel < input_channels.size(); channel++)
-      for (int row=0; row < input_channels[channel].rows; row++)
-        for (int col=0; col < input_channels[channel].cols; col++)
-          image[i][channel][row][col] = input_channels[channel].ptr<float>(row)[col];
-    label[i][0] = ann.headpose.x;
-    label[i][1] = ann.headpose.y;
-    label[i][2] = ann.headpose.z;
-  }
-//  boost::shared_ptr<H5::H5File> h5_ofs(new H5::H5File(filename, H5F_ACC_TRUNC));
-//  H5::FloatType image_type(H5::PredType::NATIVE_FLOAT);
-//  hsize_t image_dim[4] = {num_indices, 3, (hsize_t)face_size.height, (hsize_t)face_size.width};
-//  H5::DataSpace image_space(4, image_dim);
-//  H5::DataSet image_set = H5::DataSet(h5_ofs->createDataSet("data", image_type, image_space));
-//  image_set.write(image, image_type);
-//
-//  H5::FloatType label_type(H5::PredType::NATIVE_FLOAT);
-//  hsize_t label_dim[2] = {num_indices, 3};
-//  H5::DataSpace label_space(2, label_dim);
-//  H5::DataSet label_set = H5::DataSet(h5_ofs->createDataSet("label", label_type, label_space));
-//  label_set.write(label, label_type);
-//  h5_ofs->close();
-  std::cout << "Saved model: " + filename << std::endl;
 };
 
 } // namespace upm
