@@ -77,7 +77,7 @@ FaceHeadPoseCnn::train
   int num_valid_data = num_data - num_train_data;
   for (int i=0; i < num_train_data; i++)
     ofs_train << anns[i].filename << "," << anns[i].bbox.pos.x << "," << anns[i].bbox.pos.y << "," << anns[i].bbox.pos.width << "," << anns[i].bbox.pos.height << "," << anns[i].headpose.x << "," << anns[i].headpose.y << "," << anns[i].headpose.z << std::endl;
-  for (int i=0; i < num_valid_data; i++)
+  for (int i=num_train_data; i < num_data; i++)
     ofs_valid << anns[i].filename << "," << anns[i].bbox.pos.x << "," << anns[i].bbox.pos.y << "," << anns[i].bbox.pos.width << "," << anns[i].bbox.pos.height << "," << anns[i].headpose.x << "," << anns[i].headpose.y << "," << anns[i].headpose.z << std::endl;
   ofs_train.close();
   ofs_valid.close();
