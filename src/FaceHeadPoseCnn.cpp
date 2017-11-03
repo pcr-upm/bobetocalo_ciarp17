@@ -74,7 +74,6 @@ FaceHeadPoseCnn::train
   std::ofstream ofs_valid(_data_path + "valid.txt");
   const unsigned int num_data = static_cast<unsigned int>(anns.size());
   int num_train_data = static_cast<int>(num_data * TRAIN_IMAGES_PERCENTAGE);
-  int num_valid_data = num_data - num_train_data;
   for (int i=0; i < num_train_data; i++)
     ofs_train << anns[i].filename << "," << anns[i].bbox.pos.x << "," << anns[i].bbox.pos.y << "," << anns[i].bbox.pos.width << "," << anns[i].bbox.pos.height << "," << anns[i].headpose.x << "," << anns[i].headpose.y << "," << anns[i].headpose.z << std::endl;
   for (int i=num_train_data; i < num_data; i++)
