@@ -72,12 +72,18 @@ FaceHeadPoseCnn::train
   // Select random annotations for training and validation
   std::ofstream ofs_train(_data_path + "train.txt");
   std::ofstream ofs_valid(_data_path + "valid.txt");
-  const unsigned int num_data = static_cast<unsigned int>(anns.size());
-  int num_train_data = static_cast<int>(num_data * TRAIN_IMAGES_PERCENTAGE);
-  for (int i=0; i < num_train_data; i++)
-    ofs_train << anns[i].filename << "," << anns[i].bbox.pos.x << "," << anns[i].bbox.pos.y << "," << anns[i].bbox.pos.width << "," << anns[i].bbox.pos.height << "," << anns[i].headpose.x << "," << anns[i].headpose.y << "," << anns[i].headpose.z << std::endl;
-  for (int i=num_train_data; i < num_data; i++)
-    ofs_valid << anns[i].filename << "," << anns[i].bbox.pos.x << "," << anns[i].bbox.pos.y << "," << anns[i].bbox.pos.width << "," << anns[i].bbox.pos.height << "," << anns[i].headpose.x << "," << anns[i].headpose.y << "," << anns[i].headpose.z << std::endl;
+
+  srand(1);
+  std::vector<FaceAnnotation> anns_rnd(anns);
+  std::random_shuffle(anns_rnd.begin(), anns_rnd.end());
+  std::vector<upm::FaceAnnotation> anns_train, anns_valid;
+  int num_train = static_cast<int>(anns_rnd.size() * TRAIN_IMAGES_PERCENTAGE);
+  anns_train.assign(anns_rnd.begin(), anns_rnd.begin()+num_train);
+  anns_valid.assign(anns_rnd.begin()+num_train, anns_rnd.end());
+  for (const FaceAnnotation &ann : anns_train)
+    ofs_train << ann.filename << "," << ann.bbox.pos.x << "," << ann.bbox.pos.y << "," << ann.bbox.pos.width << "," << ann.bbox.pos.height << "," << ann.headpose.x << "," << ann.headpose.y << "," << ann.headpose.z << std::endl;
+  for (const FaceAnnotation &ann : anns_valid)
+    ofs_valid << ann.filename << "," << ann.bbox.pos.x << "," << ann.bbox.pos.y << "," << ann.bbox.pos.width << "," << ann.bbox.pos.height << "," << ann.headpose.x << "," << ann.headpose.y << "," << ann.headpose.z << std::endl;
   ofs_train.close();
   ofs_valid.close();
 
