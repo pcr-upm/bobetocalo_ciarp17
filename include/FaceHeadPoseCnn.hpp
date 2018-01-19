@@ -39,7 +39,8 @@ public:
   void
   train
     (
-    const std::vector<upm::FaceAnnotation> &anns
+    const std::vector<upm::FaceAnnotation> &anns_train,
+    const std::vector<upm::FaceAnnotation> &anns_valid
     );
 
   void

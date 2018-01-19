@@ -16,8 +16,6 @@
 
 namespace upm {
 
-const float TRAIN_IMAGES_PERCENTAGE = 0.9f;
-
 // -----------------------------------------------------------------------------
 //
 // Purpose and Method:
@@ -66,27 +64,10 @@ FaceHeadPoseCnn::parseOptions
 void
 FaceHeadPoseCnn::train
   (
-  const std::vector<upm::FaceAnnotation> &anns
+  const std::vector<upm::FaceAnnotation> &anns_train,
+  const std::vector<upm::FaceAnnotation> &anns_valid
   )
 {
-  // Select random annotations for training and validation
-  std::ofstream ofs_train(_data_path + "train.txt");
-  std::ofstream ofs_valid(_data_path + "valid.txt");
-
-  srand(1);
-  std::vector<FaceAnnotation> anns_rnd(anns);
-  std::random_shuffle(anns_rnd.begin(), anns_rnd.end());
-  std::vector<upm::FaceAnnotation> anns_train, anns_valid;
-  int num_train = static_cast<int>(anns_rnd.size() * TRAIN_IMAGES_PERCENTAGE);
-  anns_train.assign(anns_rnd.begin(), anns_rnd.begin()+num_train);
-  anns_valid.assign(anns_rnd.begin()+num_train, anns_rnd.end());
-  for (const FaceAnnotation &ann : anns_train)
-    ofs_train << ann.filename << "," << ann.bbox.pos.x << "," << ann.bbox.pos.y << "," << ann.bbox.pos.width << "," << ann.bbox.pos.height << "," << ann.headpose.x << "," << ann.headpose.y << "," << ann.headpose.z << std::endl;
-  for (const FaceAnnotation &ann : anns_valid)
-    ofs_valid << ann.filename << "," << ann.bbox.pos.x << "," << ann.bbox.pos.y << "," << ann.bbox.pos.width << "," << ann.bbox.pos.height << "," << ann.headpose.x << "," << ann.headpose.y << "," << ann.headpose.z << std::endl;
-  ofs_train.close();
-  ofs_valid.close();
-
   // Training CNN model
   UPM_PRINT("Training head-pose model");
 };
