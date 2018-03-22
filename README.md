@@ -9,3 +9,13 @@ Benchmarking Head Pose Estimation in-the-Wild
 Elvira Amador, Roberto Valle, José M. Buenaposada, Luis Baumela.
 Conference on Progress in Pattern Recognition, Image Analysis, Computer Vision and Applications, 22nd Iberoamerican Congress, CIARP 2017, pp. 45-52, Valparaíso, Chile, November 7-10, 2017.
 ```
+
+#### Requisites
+- faces_framework https://github.com/bobetocalo/faces_framework
+
+#### Installation
+The repository must be located inside the following directory:
+
+    faces_framework
+        └── headpose 
+             └── bobetocalo_ciarp17
