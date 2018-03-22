@@ -1,0 +1,14 @@
+data/VGG_16.caffemodel filter=lfs diff=lfs merge=lfs -text
+data/VGG_19.caffemodel filter=lfs diff=lfs merge=lfs -text
+data/AlexNet.caffemodel filter=lfs diff=lfs merge=lfs -text
+data/AlexNet_test.prototxt filter=lfs diff=lfs merge=lfs -text
+data/ResNet_101.caffemodel filter=lfs diff=lfs merge=lfs -text
+data/ResNet_50.caffemodel filter=lfs diff=lfs merge=lfs -text
+data/ResNet_50_test.prototxt filter=lfs diff=lfs merge=lfs -text
+data/ResNet_101_test.prototxt filter=lfs diff=lfs merge=lfs -text
+data/ResNet_152_test.prototxt filter=lfs diff=lfs merge=lfs -text
+data/VGG_16_test.prototxt filter=lfs diff=lfs merge=lfs -text
+data/VGG_19_test.prototxt filter=lfs diff=lfs merge=lfs -text
+data/GoogLeNet.caffemodel filter=lfs diff=lfs merge=lfs -text
+data/GoogLeNet_test.prototxt filter=lfs diff=lfs merge=lfs -text
+data/ResNet_152.caffemodel filter=lfs diff=lfs merge=lfs -text
