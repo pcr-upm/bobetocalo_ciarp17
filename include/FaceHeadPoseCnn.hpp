@@ -54,7 +54,8 @@ public:
     const upm::FaceAnnotation &ann
     );
 
-  std::string _data_path;
+  std::string _path;
+  std::string _model;
   cv::dnn::Net _net;
 };
 

@@ -16,6 +16,8 @@
 
 namespace upm {
 
+const std::vector<std::string> MODELS = {"AlexNet","GoogLeNet","ResNet_50", "ResNet_101","ResNet_152","VGG_16", "VGG_19"};
+
 // -----------------------------------------------------------------------------
 //
 // Purpose and Method:
@@ -27,7 +29,7 @@ namespace upm {
 // -----------------------------------------------------------------------------
 FaceHeadPoseCnn::FaceHeadPoseCnn(std::string path)
 {
-  _data_path = path;
+  _path = path;
 };
 
 // -----------------------------------------------------------------------------
@@ -49,7 +51,23 @@ FaceHeadPoseCnn::parseOptions
   // Declare the supported program options
   namespace po = boost::program_options;
   po::options_description desc("FaceHeadPoseCnn options");
+  std::string usage = "Select model ["+MODELS[0]+", "+MODELS[1]+", "+MODELS[2]+", "+MODELS[3]+", "+MODELS[4]+", "+MODELS[5]+", "+MODELS[6]+"]";
+  desc.add_options()
+    ("cnn", po::value<std::string>(), usage.c_str());
   UPM_PRINT(desc);
+
+  // Process the command line parameters
+  po::variables_map vm;
+  po::command_line_parser parser(argc, argv);
+  parser.options(desc);
+  const po::parsed_options parsed_opt(parser.allow_unregistered().run());
+  po::store(parsed_opt, vm);
+  po::notify(vm);
+
+  if (vm.count("cnn"))
+    _model = vm["cnn"].as<std::string>();
+  if (std::find(MODELS.begin(),MODELS.end(),_model) == MODELS.end())
+    throw std::invalid_argument("invalid model argument");
 };
 
 // -----------------------------------------------------------------------------
@@ -86,8 +104,8 @@ FaceHeadPoseCnn::load()
 {
   // Loading head-pose
   UPM_PRINT("Loading head-pose");
-  std::string deploy_file   = _data_path + "GoogLeNet_test.prototxt";
-  std::string trained_model = _data_path + "GoogLeNet.caffemodel";
+  std::string deploy_file   = _path + _model + "_test.prototxt";
+  std::string trained_model = _path + _model + ".caffemodel";
   try
   {
     _net = cv::dnn::readNetFromCaffe(deploy_file, trained_model);

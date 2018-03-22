@@ -14,8 +14,16 @@ Conference on Progress in Pattern Recognition, Image Analysis, Computer Vision a
 - faces_framework https://github.com/bobetocalo/faces_framework
 
 #### Installation
-The repository must be located inside the following directory:
+This repository must be located inside the following directory:
 
     faces_framework
         └── headpose 
              └── bobetocalo_ciarp17
+
+### Usage
+Example of how to use this repository:
+
+```
+> ./cmake-build-debug/face_headpose_bobetocalo_ciarp17_test --cnn GoogLeNet
+```
+
