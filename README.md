@@ -15,14 +15,21 @@ Conference on Progress in Pattern Recognition, Image Analysis, Computer Vision a
 
 #### Installation
 This repository must be located inside the following directory:
-
-    faces_framework
-        └── headpose 
-             └── bobetocalo_ciarp17
+```
+faces_framework
+    └── headpose 
+        └── bobetocalo_ciarp17
+```
+You need to have a C++ compiler (supporting C++11):
+```
+> mkdir release
+> cd release
+> cmake ..
+> make -j$(nproc)
+> cd ..
+```
 #### Usage
-Example of how to use this repository:
-
+Use the --cnn option to set the supported model.
 ```
-> ./cmake-build-debug/face_headpose_bobetocalo_ciarp17_test --cnn GoogLeNet
+> ./release/face_headpose_bobetocalo_ciarp17_test --cnn GoogLeNet
 ```
-
