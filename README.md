@@ -19,8 +19,7 @@ This repository must be located inside the following directory:
     faces_framework
         └── headpose 
              └── bobetocalo_ciarp17
-
-### Usage
+#### Usage
 Example of how to use this repository:
 
 ```
