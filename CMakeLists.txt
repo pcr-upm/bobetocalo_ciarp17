@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # Test face alignment algorithms
 #------------------------------------------------------------------------------
-project(cnn)
+project(bobetocalo_ciarp17)
 cmake_minimum_required(VERSION 3.2)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../CMakeLists.txt)
@@ -18,23 +18,23 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../CMakeLists.txt)
 #message(STATUS HDF5_DEFINITIONS=${HDF5_DEFINITIONS})
 
 #-- Find include files
-set(face_headpose_cnn_include
+set(face_headpose_bobetocalo_ciarp17_include
   ${faces_framework_include}
 #  ${Caffe_INCLUDE_DIRS}
 #  ${HDF5_INCLUDE_DIRS}
   ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-set(face_headpose_cnn_src
+set(face_headpose_bobetocalo_ciarp17_src
   ${faces_framework_src}
   ${CMAKE_CURRENT_LIST_DIR}/src/FaceHeadPoseCnn.cpp
 )
 
-set(face_headpose_cnn_test
-  ${CMAKE_CURRENT_LIST_DIR}/test/face_headpose_cnn_test.cpp
+set(face_headpose_bobetocalo_ciarp17_test
+  ${CMAKE_CURRENT_LIST_DIR}/test/face_headpose_bobetocalo_ciarp17_test.cpp
 )
 
-set(face_headpose_cnn_libs
+set(face_headpose_bobetocalo_ciarp17_libs
   ${faces_framework_libs}
 #  ${Caffe_LIBRARIES}
 #  ${HDF5_LIBRARIES}
@@ -43,14 +43,14 @@ set(face_headpose_cnn_libs
 #-- Setup CMake to run tests
 enable_testing()
 
-include_directories(${face_headpose_cnn_include})
+include_directories(${face_headpose_bobetocalo_ciarp17_include})
 
-foreach(test ${face_headpose_cnn_test})
+foreach(test ${face_headpose_bobetocalo_ciarp17_test})
   get_filename_component(test_name ${test} NAME_WE)
   add_executable(${test_name}
-    ${face_headpose_cnn_src}
+    ${face_headpose_bobetocalo_ciarp17_src}
     ${test}
   )
-  target_link_libraries(${test_name} ${face_headpose_cnn_libs})
+  target_link_libraries(${test_name} ${face_headpose_bobetocalo_ciarp17_libs})
   add_test(NAME ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND ${test_name})
 endforeach()

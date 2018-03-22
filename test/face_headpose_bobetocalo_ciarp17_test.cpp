@@ -1,5 +1,5 @@
 /** ****************************************************************************
- *  @file    face_headpose_cnn_test.cpp
+ *  @file    face_headpose_bobetocalo_ciarp17_test.cpp
  *  @brief   Face detection and recognition framework
  *  @author  Roberto Valle Fernandez
  *  @date    2017/05
@@ -69,6 +69,6 @@ main
 //  viewer->init(0, 0, "face_headpose_cnn_test");
 //  showResults(viewer, ticks, 0, frame, composite, faces, ann);
 
-  UPM_PRINT("End of face_headpose_cnn_test");
+  UPM_PRINT("End of face_headpose_bobetocalo_ciarp17_test");
   return EXIT_SUCCESS;
 };
