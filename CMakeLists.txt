@@ -52,5 +52,5 @@ foreach(test ${face_headpose_bobetocalo_ciarp17_test})
     ${test}
   )
   target_link_libraries(${test_name} ${face_headpose_bobetocalo_ciarp17_libs})
-  add_test(NAME ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND ${test_name})
+  add_test(NAME ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR} COMMAND ${test_name} --cnn GoogLeNet)
 endforeach()
