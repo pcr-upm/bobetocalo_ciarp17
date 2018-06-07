@@ -133,27 +133,35 @@ FaceHeadPoseCnn::process
   const upm::FaceAnnotation &ann
   )
 {
-  cv::Size face_size = cv::Size(224,224);
+  const float BBOX_SCALE = 0.3f;
+  const cv::Size FACE_SIZE = cv::Size(224,224);
 
   // Analyze each detected face
   for (FaceAnnotation &face : faces)
   {
-    // Scale image
-    cv::Mat face_translated, T = (cv::Mat_<float>(2,3) << 1, 0, -face.bbox.pos.x, 0, 1, -face.bbox.pos.y);
-    cv::warpAffine(frame, face_translated, T, frame.size());
-    cv::Mat face_scaled, S = (cv::Mat_<float>(2,3) << face_size.width/face.bbox.pos.width, 0, 0, 0, face_size.height/face.bbox.pos.height, 0);
-    cv::warpAffine(face_translated, face_scaled, S, face_size);
+    /// Enlarge square bounding box
+    cv::Rect_<float> bbox_enlarged;
+    cv::Point2f shift(face.bbox.pos.width*BBOX_SCALE, face.bbox.pos.height*BBOX_SCALE);
+    bbox_enlarged = cv::Rect_<float>(face.bbox.pos.x-shift.x, face.bbox.pos.y-shift.y, face.bbox.pos.width+(shift.x*2), face.bbox.pos.height+(shift.y*2));
+    /// Squared bbox required by neural networks
+    bbox_enlarged.x = bbox_enlarged.x+(bbox_enlarged.width*0.5f)-(bbox_enlarged.height*0.5f);
+    bbox_enlarged.width = bbox_enlarged.height;
+    /// Scale image
+    cv::Mat face_translated, T = (cv::Mat_<float>(2,3) << 1, 0, -bbox_enlarged.x, 0, 1, -bbox_enlarged.y);
+    cv::warpAffine(frame, face_translated, T, bbox_enlarged.size());
+    cv::Mat face_scaled, S = (cv::Mat_<float>(2,3) << FACE_SIZE.width/bbox_enlarged.width, 0, 0, 0, FACE_SIZE.height/bbox_enlarged.height, 0);
+    cv::warpAffine(face_translated, face_scaled, S, FACE_SIZE);
 
-    // Estimate head-pose using a CNN
+    /// Estimate head-pose using a CNN
     double scale_factor = 1.0;
     cv::Scalar mean = cv::Scalar(0,0,0);
     bool swapRB = false;
-    cv::Mat input_blob = cv::dnn::blobFromImage(face_scaled, scale_factor, face_size, mean, swapRB);
+    cv::Mat input_blob = cv::dnn::blobFromImage(face_scaled, scale_factor, FACE_SIZE, mean, swapRB);
     _net.setInput(input_blob, "data");
     cv::Mat prob = _net.forward();
     const float *output = prob.ptr<float>();
 
-    // Store continuous head-pose
+    /// Store continuous head-pose
     face.headpose = cv::Point3f(output[0], output[1], output[2]);
   }
 };
