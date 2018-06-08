@@ -17,6 +17,8 @@
 namespace upm {
 
 const std::vector<std::string> MODELS = {"AlexNet","GoogLeNet","ResNet_50","ResNet_101","ResNet_152","VGG_16","VGG_19"};
+const float BBOX_SCALE = 0.3f;
+const cv::Size FACE_SIZE = cv::Size(224,224);
 
 // -----------------------------------------------------------------------------
 //
@@ -133,16 +135,12 @@ FaceHeadPoseCnn::process
   const upm::FaceAnnotation &ann
   )
 {
-  const float BBOX_SCALE = 0.3f;
-  const cv::Size FACE_SIZE = cv::Size(224,224);
-
   // Analyze each detected face
   for (FaceAnnotation &face : faces)
   {
     /// Enlarge square bounding box
-    cv::Rect_<float> bbox_enlarged;
     cv::Point2f shift(face.bbox.pos.width*BBOX_SCALE, face.bbox.pos.height*BBOX_SCALE);
-    bbox_enlarged = cv::Rect_<float>(face.bbox.pos.x-shift.x, face.bbox.pos.y-shift.y, face.bbox.pos.width+(shift.x*2), face.bbox.pos.height+(shift.y*2));
+    cv::Rect_<float> bbox_enlarged = cv::Rect_<float>(face.bbox.pos.x-shift.x, face.bbox.pos.y-shift.y, face.bbox.pos.width+(shift.x*2), face.bbox.pos.height+(shift.y*2));
     /// Squared bbox required by neural networks
     bbox_enlarged.x = bbox_enlarged.x+(bbox_enlarged.width*0.5f)-(bbox_enlarged.height*0.5f);
     bbox_enlarged.width = bbox_enlarged.height;
