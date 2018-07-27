@@ -16,7 +16,7 @@
 
 namespace upm {
 
-const std::vector<std::string> MODELS = {"AlexNet","GoogLeNet","ResNet_50","ResNet_101","ResNet_152","VGG_16","VGG_19"};
+const std::vector<std::string> MODELS = {"GoogLeNet","ResNet_50","ResNet_101","ResNet_152","VGG_16","VGG_19"};
 const float BBOX_SCALE = 0.3f;
 const cv::Size FACE_SIZE = cv::Size(224,224);
 
