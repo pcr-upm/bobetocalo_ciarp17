@@ -53,7 +53,7 @@ FaceHeadPoseCnn::parseOptions
   // Declare the supported program options
   namespace po = boost::program_options;
   po::options_description desc("FaceHeadPoseCnn options");
-  std::string usage = "Select model ["+MODELS[0]+", "+MODELS[1]+", "+MODELS[2]+", "+MODELS[3]+", "+MODELS[4]+", "+MODELS[5]+", "+MODELS[6]+"]";
+  std::string usage = "Select model ["+MODELS[0]+", "+MODELS[1]+", "+MODELS[2]+", "+MODELS[3]+", "+MODELS[4]+", "+MODELS[5]+"]";
   desc.add_options()
     ("cnn", po::value<std::string>(), usage.c_str());
   UPM_PRINT(desc);
