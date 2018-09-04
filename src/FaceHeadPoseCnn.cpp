@@ -55,7 +55,7 @@ FaceHeadPoseCnn::parseOptions
   po::options_description desc("FaceHeadPoseCnn options");
   std::string usage = "Select model ["+MODELS[0]+", "+MODELS[1]+", "+MODELS[2]+", "+MODELS[3]+", "+MODELS[4]+", "+MODELS[5]+"]";
   desc.add_options()
-    ("cnn", po::value<std::string>(), usage.c_str());
+    ("cnn", po::value<std::string>()->default_value(MODELS[0]), usage.c_str());
   UPM_PRINT(desc);
 
   // Process the command line parameters
